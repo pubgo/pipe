@@ -4,6 +4,10 @@ import (
 	"reflect"
 )
 
+func IsPtr(p interface{}) bool {
+	return reflect.TypeOf(p).Kind() == reflect.Ptr
+}
+
 func IsError(p interface{}) bool {
 	if p == nil {
 		return false
