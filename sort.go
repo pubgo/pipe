@@ -6,6 +6,7 @@ import (
 )
 
 func SortBy(data interface{}, swap interface{}) interface{} {
+
 	assertFn(swap)
 
 	_fn := reflect.ValueOf(swap)

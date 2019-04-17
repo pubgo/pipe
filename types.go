@@ -2,10 +2,17 @@ package pipe
 
 import (
 	"reflect"
+	"strconv"
 )
 
 func IsPtr(p interface{}) bool {
 	return reflect.TypeOf(p).Kind() == reflect.Ptr
+}
+
+func ToInt(p string) int {
+	r, err := strconv.Atoi(p)
+	assert(err != nil, "can not convert %s to int,error(%s)", p, err)
+	return r
 }
 
 func IsError(p interface{}) bool {
