@@ -5,10 +5,4 @@ import (
 )
 
 var assert = _assert.Bool
-
-func If(b bool, tv, fv interface{}) interface{} {
-	if b {
-		return tv
-	}
-	return fv
-}
+var If = _assert.If

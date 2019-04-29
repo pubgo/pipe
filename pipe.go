@@ -204,9 +204,8 @@ func (t *_func) MustNotError() {
 			continue
 		}
 
-		if d, ok := p.Interface().(error); ok {
-			panic(d.Error())
-		}
+		d, ok := p.Interface().(error)
+		assert(ok, "error: %s", d.Error())
 	}
 }
 
@@ -222,9 +221,9 @@ func (t *_func) FilterExp(filter string) *_func {
 	var vs []reflect.Value
 	for _, p := range t.params {
 		if !p.IsValid() {
-			_ps["it"] = nil
+			_ps["t"] = nil
 		} else {
-			_ps["it"] = p.Interface()
+			_ps["t"] = p.Interface()
 		}
 
 		output, err := expr.Eval(filter, _ps)
@@ -263,20 +262,6 @@ func (t *_func) Filter(fn interface{}) *_func {
 	}
 
 	return &_func{params: vs}
-}
-
-func (t *_func) ToSlice() *_func {
-	var _ps []reflect.Value
-	if len(t.params) == 0 {
-		return t
-	}
-
-	_ds := t.params[0]
-	for i := 0; i < _ds.Len(); i++ {
-		_ps = append(_ps, _ds.Index(i))
-	}
-	t.params = _ps
-	return t
 }
 
 func (t *_func) Each(fn interface{}) {
