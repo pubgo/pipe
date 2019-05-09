@@ -1,17 +1,16 @@
 package pipe
 
 import (
-	"github.com/pubgo/assert"
 	"reflect"
 	"sort"
 )
 
 func SortBy(data interface{}, swap interface{}) interface{} {
-	assert.AssertFn(swap)
+	_AssertFn(swap)
 
 	_d := reflect.ValueOf(data)
-	assert.ST(!_d.IsValid() || _d.IsNil(), "data is null")
-	assert.ST(_d.Kind() != reflect.Slice, "data type is not slice")
+	_ST(_IsNil(data), "data is null")
+	_ST(_d.Kind() != reflect.Slice, "data type is not slice")
 
 	if _d.Len() == 0 {
 		return data
@@ -19,9 +18,9 @@ func SortBy(data interface{}, swap interface{}) interface{} {
 
 	_fn := reflect.ValueOf(swap)
 	_t := _fn.Type()
-	assert.ST(_t.NumIn() != 2, "the func input num is more than 2(%d)", _t.NumIn())
-	assert.ST(_t.Out(0).Kind() != reflect.Bool, "the func output type is not bool(%s)", _t.Out(0).String())
-	assert.ST(assert.IfEquals(_d.Index(0).Kind(), _t.In(0).Kind(), _t.In(1).Kind()), "the func output type is not bool(%s)", _t.Out(0).String())
+	_ST(_t.NumIn() != 2, "the func input num is more than 2(%d)", _t.NumIn())
+	_ST(_t.Out(0).Kind() != reflect.Bool, "the func output type is not bool(%s)", _t.Out(0).String())
+	_ST(_IfEquals(_d.Index(0).Kind(), _t.In(0).Kind(), _t.In(1).Kind()), "the func output type is not bool(%s)", _t.Out(0).String())
 
 	var _ps []reflect.Value
 	for i := 0; i < _d.Len(); i++ {
