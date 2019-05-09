@@ -1,20 +1,28 @@
 package pipe
 
 import (
+	"github.com/pubgo/assert"
 	"reflect"
 	"sort"
 )
 
 func SortBy(data interface{}, swap interface{}) interface{} {
+	assert.AssertFn(swap)
 
-	assertFn(swap)
+	_d := reflect.ValueOf(data)
+	assert.ST(!_d.IsValid() || _d.IsNil(), "data is null")
+	assert.ST(_d.Kind() != reflect.Slice, "data type is not slice")
+
+	if _d.Len() == 0 {
+		return data
+	}
 
 	_fn := reflect.ValueOf(swap)
 	_t := _fn.Type()
-	assert(_t.NumIn() != 2, "the func input num is more than 2(%d)", _t.NumIn())
-	assert(_t.Out(0).Kind() != reflect.Bool, "the func output type is not bool(%s)", _t.Out(0).Kind().String())
+	assert.ST(_t.NumIn() != 2, "the func input num is more than 2(%d)", _t.NumIn())
+	assert.ST(_t.Out(0).Kind() != reflect.Bool, "the func output type is not bool(%s)", _t.Out(0).String())
+	assert.ST(assert.IfEquals(_d.Index(0).Kind(), _t.In(0).Kind(), _t.In(1).Kind()), "the func output type is not bool(%s)", _t.Out(0).String())
 
-	_d := reflect.ValueOf(data)
 	var _ps []reflect.Value
 	for i := 0; i < _d.Len(); i++ {
 		if !_d.Index(i).IsValid() {

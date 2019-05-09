@@ -3,6 +3,7 @@ package pipe
 import (
 	"fmt"
 	"github.com/antonmedv/expr"
+	"github.com/pubgo/assert"
 	"reflect"
 )
 
@@ -10,30 +11,13 @@ type _func struct {
 	params []reflect.Value
 }
 
-func (t *_func) SortByName(name string, desc bool) *_func {
-
-	//_fn := func(a, b reflect.Value) {
-	//
-	//}
-
-	//for i := 0; i < len(t.params); i++ {
-	//	if !t.params[i].IsValid() {
-	//		t.params[i] = reflect.Zero(_t.In(0))
-	//	}
-	//}
-
-	//t.params = reflectValueSlice{data: t.params, swap: _fn}.Sort()
-
-	return nil
-}
-
 func (t *_func) SortBy(swap interface{}) *_func {
-	assertFn(swap)
+	assert.AssertFn(swap)
 
 	_fn := reflect.ValueOf(swap)
 	_t := _fn.Type()
-	assert(_t.NumIn() != 2, "the func input num is more than 2(%d)", _t.NumIn())
-	assert(_t.Out(0).Kind() != reflect.Bool, "the func output type is not bool(%s)", _t.Out(0).Kind().String())
+	assert.ST(_t.NumIn() != 2, "the func input num is more than 2(%d)", _t.NumIn())
+	assert.ST(_t.Out(0).Kind() != reflect.Bool, "the func output type is not bool(%s)", _t.Out(0).Kind().String())
 
 	for i := 0; i < len(t.params); i++ {
 		if !t.params[i].IsValid() {
@@ -47,12 +31,12 @@ func (t *_func) SortBy(swap interface{}) *_func {
 }
 
 func (t *_func) Pipe(fn interface{}) *_func {
-	assertFn(fn)
+	assert.AssertFn(fn)
 
 	_fn := reflect.ValueOf(fn)
 	_t := _fn.Type()
 
-	assert(len(t.params) != _t.NumIn(), "the params num is not match(%d,%d)", len(t.params), _t.NumIn())
+	assert.ST(len(t.params) != _t.NumIn(), "the params num is not match(%d,%d)", len(t.params), _t.NumIn())
 
 	var _res []reflect.Value
 	for i, p := range t.params {
@@ -96,10 +80,10 @@ func (t *_func) MapExp(code string) *_func {
 		}
 
 		output, err := expr.Eval(code, _ps)
-		assert(err != nil, "FilterExp error(%s)", err)
+		assert.ST(err != nil, "FilterExp error(%s)", err)
 
 		out, ok := output.(bool)
-		assert(!ok, "output type error")
+		assert.ST(!ok, "output type error")
 
 		if out {
 			vs = append(vs, p)
@@ -110,13 +94,13 @@ func (t *_func) MapExp(code string) *_func {
 }
 
 func (t *_func) Map(fn interface{}) *_func {
-	assertFn(fn)
+	assert.AssertFn(fn)
 
 	_fn := reflect.ValueOf(fn)
 	_t := _fn.Type()
-	assert(_t.NumIn() > 2 || _t.NumIn() == 0, "the func input num is [1,2], now(%d)", _t.NumIn())
-	assert(_t.NumOut() != 1, "the func output num is 1, now(%d)", _t.NumOut())
-	assert(_t.In(_t.NumIn()-1) != _t.Out(0), "the func input output type is not match(%s,%s)", _t.In(_t.NumIn()-1), _t.Out(0))
+	assert.ST(_t.NumIn() > 2 || _t.NumIn() == 0, "the func input num is [1,2], now(%d)", _t.NumIn())
+	assert.ST(_t.NumOut() != 1, "the func output num is 1, now(%d)", _t.NumOut())
+	assert.ST(_t.In(_t.NumIn()-1) != _t.Out(0), "the func input output type is not match(%s,%s)", _t.In(_t.NumIn()-1), _t.Out(0))
 
 	var _res []reflect.Value
 	for i, p := range t.params {
@@ -124,7 +108,7 @@ func (t *_func) Map(fn interface{}) *_func {
 			p = reflect.New(_t.In(_t.NumIn() - 1).Elem())
 		}
 
-		_r := _fn.Call(If(_t.NumIn() == 1, []reflect.Value{p}, []reflect.Value{reflect.ValueOf(i), p}).([]reflect.Value))
+		_r := _fn.Call(assert.If(_t.NumIn() == 1, []reflect.Value{p}, []reflect.Value{reflect.ValueOf(i), p}).([]reflect.Value))
 		if !_r[0].IsValid() {
 			_r[0] = reflect.New(_t.Out(0).Elem())
 		}
@@ -136,13 +120,13 @@ func (t *_func) Map(fn interface{}) *_func {
 }
 
 func (t *_func) Reduce(fn interface{}) *_func {
-	assertFn(fn)
+	assert.AssertFn(fn)
 
 	_fn := reflect.ValueOf(fn)
 	_t := _fn.Type()
-	assert(_t.NumIn() != 2, "the func input num is not equal 2(%d)", _t.NumIn())
-	assert(_t.NumOut() != 1, "the func output num is not equal 1(%d)", _t.NumOut())
-	assert(_t.In(0) != _t.In(1) || _t.In(1) != _t.Out(0), "the func input and output type is not match(%s,%s,%s)", _t.In(0), _t.In(1), _t.Out(0))
+	assert.ST(_t.NumIn() != 2, "the func input num is not equal 2(%d)", _t.NumIn())
+	assert.ST(_t.NumOut() != 1, "the func output num is not equal 1(%d)", _t.NumOut())
+	assert.ST(_t.In(0) != _t.In(1) || _t.In(1) != _t.Out(0), "the func input and output type is not match(%s,%s,%s)", _t.In(0), _t.In(1), _t.Out(0))
 
 	if len(t.params) == 0 {
 		return &_func{}
@@ -177,10 +161,10 @@ func (t *_func) Reduce(fn interface{}) *_func {
 }
 
 func (t *_func) Any(fn func(v interface{}) bool) bool {
-	assertFn(fn)
+	assert.AssertFn(fn)
 
 	for _, p := range t.params {
-		if fn(If(!p.IsValid(), nil, Fn(p.Interface))) {
+		if fn(assert.If(!p.IsValid(), nil, assert.FnOf(p.Interface))) {
 			return true
 		}
 	}
@@ -188,10 +172,10 @@ func (t *_func) Any(fn func(v interface{}) bool) bool {
 }
 
 func (t *_func) Every(fn func(v interface{}) bool) bool {
-	assertFn(fn)
+	assert.AssertFn(fn)
 
 	for _, p := range t.params {
-		if !fn(If(!p.IsValid(), nil, Fn(p.Interface))) {
+		if !fn(assert.If(!p.IsValid(), nil, assert.FnOf(p.Interface))) {
 			return false
 		}
 	}
@@ -205,13 +189,14 @@ func (t *_func) MustNotError() {
 		}
 
 		d, ok := p.Interface().(error)
-		assert(ok, "error: %s", d.Error())
+		assert.ST(ok, "error: %s", d.Error())
 	}
 }
 
 func (t *_func) FilterError() *_func {
 	return t.Filter(func(v interface{}) bool {
-		return !IsError(v)
+		_, ok := v.(error)
+		return !ok
 	})
 }
 
@@ -227,10 +212,10 @@ func (t *_func) FilterExp(filter string) *_func {
 		}
 
 		output, err := expr.Eval(filter, _ps)
-		assert(err != nil, "FilterExp error(%s)", err)
+		assert.ST(err != nil, "FilterExp error(%s)", err)
 
 		out, ok := output.(bool)
-		assert(!ok, "output type error")
+		assert.ST(!ok, "output type error")
 
 		if out {
 			vs = append(vs, p)
@@ -241,13 +226,13 @@ func (t *_func) FilterExp(filter string) *_func {
 }
 
 func (t *_func) Filter(fn interface{}) *_func {
-	assertFn(fn)
+	assert.AssertFn(fn)
 
 	_fn := reflect.ValueOf(fn)
 	_t := _fn.Type()
-	assert(_t.NumIn() > 2, "the func input num is more than 2(%d)", _t.NumIn())
-	assert(_t.NumOut() != 1, "the func output num is not equal 1(%d)", _t.NumOut())
-	assert(_t.Out(0).Kind() != reflect.Bool, "the func output type is not bool(%s)", _t.Out(0).Kind().String())
+	assert.ST(_t.NumIn() > 2, "the func input num is more than 2(%d)", _t.NumIn())
+	assert.ST(_t.NumOut() != 1, "the func output num is not equal 1(%d)", _t.NumOut())
+	assert.ST(_t.Out(0).Kind() != reflect.Bool, "the func output type is not bool(%s)", _t.Out(0).Kind().String())
 
 	var vs []reflect.Value
 	for i, p := range t.params {
@@ -255,7 +240,7 @@ func (t *_func) Filter(fn interface{}) *_func {
 			p = reflect.New(_t.In(_t.NumIn() - 1).Elem())
 		}
 
-		_r := _fn.Call(If(_t.NumIn() == 1, []reflect.Value{p}, []reflect.Value{reflect.ValueOf(i), p}).([]reflect.Value))
+		_r := _fn.Call(assert.If(_t.NumIn() == 1, []reflect.Value{p}, []reflect.Value{reflect.ValueOf(i), p}).([]reflect.Value))
 		if _r[0].Bool() {
 			vs = append(vs, p)
 		}
@@ -265,24 +250,24 @@ func (t *_func) Filter(fn interface{}) *_func {
 }
 
 func (t *_func) Each(fn interface{}) {
-	assertFn(fn)
+	assert.AssertFn(fn)
 
 	_fn := reflect.ValueOf(fn)
 	_t := _fn.Type()
-	assert(_t.NumIn() > 2, "the func input num is more than 2(%d)", _t.NumIn())
-	assert(_t.NumIn() == 0, "the func input num is more than 2(%d)", _t.NumIn())
-	assert(_t.NumOut() != 0, "the func output num is not equal 0(%d)", _t.NumOut())
+	assert.ST(_t.NumIn() > 2, "the func input num is more than 2(%d)", _t.NumIn())
+	assert.ST(_t.NumIn() == 0, "the func input num is more than 2(%d)", _t.NumIn())
+	assert.ST(_t.NumOut() != 0, "the func output num is not equal 0(%d)", _t.NumOut())
 
 	for i, p := range t.params {
 		if !p.IsValid() {
 			p = reflect.New(_t.In(_t.NumIn() - 1).Elem())
 		}
-		_fn.Call(If(_t.NumIn() == 1, []reflect.Value{p}, []reflect.Value{reflect.ValueOf(i), p}).([]reflect.Value))
+		_fn.Call(assert.If(_t.NumIn() == 1, []reflect.Value{p}, []reflect.Value{reflect.ValueOf(i), p}).([]reflect.Value))
 	}
 }
 
 func DataRange(s, e, t int) *_func {
-	assert(s > e, "")
+	assert.ST(s > e, "")
 
 	var _ps []reflect.Value
 	for i := s; i < e; i += t {

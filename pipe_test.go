@@ -2,8 +2,8 @@ package pipe_test
 
 import (
 	"encoding/hex"
-	"errors"
 	"fmt"
+	"github.com/pubgo/assert"
 	"github.com/pubgo/pipe"
 	"math/big"
 	"reflect"
@@ -140,12 +140,6 @@ func TestPipe(t *testing.T) {
 	}).P("test pipe")
 }
 
-func TestIsError(t *testing.T) {
-	fmt.Println(pipe.IsError(errors.New("")))
-	fmt.Println(pipe.IsError(nil))
-
-}
-
 func TestError(t *testing.T) {
 	//pipe.Data(1, 2, 3, errors.New("sss")).MustNotError()
 	pipe.Data(1, 2, 3, nil).MustNotError()
@@ -164,9 +158,9 @@ func TestToData(t *testing.T) {
 func TestIf(t *testing.T) {
 	t.Run("懒加载", func(t *testing.T) {
 		a := "0 */2 * * * *"
-		fmt.Println(pipe.If(true, pipe.Fn(strings.Split, a, "*"), 2))
-		fmt.Println(pipe.If(false, pipe.Fn(fmt.Println, "1", 2), 2))
-		fmt.Println(pipe.If(true, pipe.Fn(fmt.Println, "1", 2), 2))
+		fmt.Println(assert.If(true, pipe.Fn(strings.Split, a, "*"), 2))
+		fmt.Println(assert.If(false, pipe.Fn(fmt.Println, "1", 2), 2))
+		fmt.Println(assert.If(true, pipe.Fn(fmt.Println, "1", 2), 2))
 	})
 }
 
@@ -215,14 +209,6 @@ func TestSortBy(t *testing.T) {
 		fmt.Println(a)
 	}
 
-	aa := pipe.SortBy([]string{"11", "2", "31"}, func(a, b string) bool {
-		return strings.Compare(a, b) < 0
-	}).([]string)
-
-	for _, _a := range aa {
-		fmt.Println(_a, len(_a), len(aa))
-	}
-
 	fmt.Println("nil test", pipe.
 		Data(nil, &t1{A: "1", b: 2}, &t1{A: "1", b: 3}).
 		SortBy(func(a, b *t1) bool {
@@ -243,7 +229,7 @@ func TestSortBy(t *testing.T) {
 }
 
 func TestGroupBy(t *testing.T) {
-	pipe.Data(nil, &t1{A: "1", b: 2}, map[string]interface{}{"A": "2"}, t1{A: "1", b: 2}, &t1{A: "2", b: 3}, &t1{A: "2", b: 3}).GroupBy("A").Echo()
+	pipe.Data(nil, &t1{A: "1", b: 2}, map[string]interface{}{"A": "2"}, t1{A: "1", b: 2}, &t1{A: "2", b: 3}, &t1{A: "2", b: 3})
 }
 
 func TestName123(t *testing.T) {

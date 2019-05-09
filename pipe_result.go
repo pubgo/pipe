@@ -2,6 +2,7 @@ package pipe
 
 import (
 	"encoding/json"
+	"github.com/pubgo/assert"
 	"reflect"
 )
 
@@ -59,7 +60,7 @@ func (t *_data) Json() string {
 	}
 
 	dt, err := json.Marshal(_res)
-	assert(err != nil, "data json error(%s)", err)
+	assert.ST(err != nil, "data json error(%s)", err)
 
 	return string(dt)
 }
