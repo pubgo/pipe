@@ -6,7 +6,24 @@ import (
 )
 
 type _func struct {
+	IPipe
 	params []reflect.Value
+}
+
+func (t *_func) Pipe(fn interface{}) *_func {
+	_AssertFn(fn)
+
+	_fn := reflect.ValueOf(fn)
+	_t := _fn.Type()
+
+	_ST(len(t.params) != _t.NumIn(), "the params num is not match(%d,%d)", len(t.params), _t.NumIn())
+
+	for i, p := range t.params {
+		if !p.IsValid() {
+			t.params[i] = reflect.New(_t.In(i)).Elem()
+		}
+	}
+	return &_func{params: _fn.Call(t.params)}
 }
 
 func (t *_func) SortBy(swap interface{}) *_func {
@@ -28,28 +45,10 @@ func (t *_func) SortBy(swap interface{}) *_func {
 	return t
 }
 
-func (t *_func) Pipe(fn interface{}) *_func {
-	_AssertFn(fn)
-
-	_fn := reflect.ValueOf(fn)
-	_t := _fn.Type()
-
-	_ST(len(t.params) != _t.NumIn(), "the params num is not match(%d,%d)", len(t.params), _t.NumIn())
-
-	var _res []reflect.Value
-	for i, p := range t.params {
-		if !p.IsValid() {
-			p = reflect.New(_t.In(i)).Elem()
-		}
-		_res = append(_res, p)
-	}
-	return &_func{params: _fn.Call(_res)}
-}
-
 func (t *_func) P(tags ...string) {
 	for _, p := range t.params {
 		if p.IsValid() {
-			fmt.Println(p.Kind().String(), p.Type().String(), p.Interface())
+			fmt.Println(p.Kind().String(), p.Type().Name(), p.Interface())
 			continue
 		}
 
@@ -60,10 +59,6 @@ func (t *_func) P(tags ...string) {
 		fmt.Println(tags[0])
 	}
 	fmt.Print("\n\n")
-}
-
-func (t *_func) ToData() *_data {
-	return &_data{_values: t.params}
 }
 
 func (t *_func) MapExp(code string) *_func {
@@ -180,21 +175,15 @@ func (t *_func) Every(fn func(v interface{}) bool) bool {
 	return true
 }
 
-func (t *_func) MustNotError() {
+func (t *_func) MustNotNil() {
 	for _, p := range t.params {
-		if !p.IsValid() {
-			continue
-		}
-
-		d, ok := p.Interface().(error)
-		_ST(ok, "error: %s", d.Error())
+		_ST(_IsNil(p), "nil error")
 	}
 }
 
-func (t *_func) FilterError() *_func {
+func (t *_func) FilterNil() *_func {
 	return t.Filter(func(v interface{}) bool {
-		_, ok := v.(error)
-		return !ok
+		return !_IsNil(v)
 	})
 }
 
@@ -261,38 +250,5 @@ func (t *_func) Each(fn interface{}) {
 			p = reflect.New(_t.In(_t.NumIn() - 1).Elem())
 		}
 		_fn.Call(_If(_t.NumIn() == 1, []reflect.Value{p}, []reflect.Value{reflect.ValueOf(i), p}).([]reflect.Value))
-	}
-}
-
-func Range(s, e, t int) *_func {
-	_ST(s > e, "")
-
-	var _ps []reflect.Value
-	for i := s; i < e; i += t {
-		_ps = append(_ps, reflect.ValueOf(i))
-	}
-	return &_func{
-		params: _ps,
-	}
-}
-
-func ArrayOf(ps interface{}) *_func {
-	_d := reflect.ValueOf(ps)
-	var _ps []reflect.Value
-	for i := 0; i < _d.Len(); i++ {
-		_ps = append(_ps, _d.Index(i))
-	}
-	return &_func{
-		params: _ps,
-	}
-}
-
-func DataOf(ps ...interface{}) *_func {
-	var vs []reflect.Value
-	for _, v := range ps {
-		vs = append(vs, reflect.ValueOf(v))
-	}
-	return &_func{
-		params: vs,
 	}
 }

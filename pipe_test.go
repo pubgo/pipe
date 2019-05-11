@@ -31,6 +31,10 @@ func TestFilter(t *testing.T) {
 			return v.b > 1
 		}).P()
 	})
+
+	Filter([]string{"1", "2"}, func(v string) bool {
+		return v == "1"
+	}).P()
 }
 
 func TestMap(t *testing.T) {
@@ -49,9 +53,7 @@ func TestMap(t *testing.T) {
 	DataOf(t1{A: "dd", b: 1}, t1{A: "sss", b: 2}).Map(func(i int, v t1) t1 {
 		v.b = 100000
 		return v
-	}).Pipe(func(a t1, aa t1) {
-		fmt.Println(a)
-	})
+	}).P()
 
 	DataOf(nil, &t1{}).Map(func(i int, v *t1) *t1 {
 		if v == nil {
@@ -82,14 +84,6 @@ func TestArray(t *testing.T) {
 	ArrayOf(ddd).Each(func(i, n int) {
 		fmt.Println(i, n)
 	})
-
-	Range(1, 100, 3).P()
-	Range(1, 100, 3).Map(func(a int) int {
-		fmt.Println(a)
-		return a
-	}).Each(func(i, n int) {
-		fmt.Println(i, n)
-	})
 }
 
 func TestReduce(t *testing.T) {
@@ -108,7 +102,7 @@ func TestReduce(t *testing.T) {
 		return v
 	}).Reduce(func(s t1, v t1) t1 {
 		return t1{b: s.b + v.b, A: s.A + v.A}
-	}).ToData().Json())
+	}).ToJson())
 }
 
 func TestEach(t *testing.T) {
@@ -140,16 +134,16 @@ func TestPipe(t *testing.T) {
 
 func TestError(t *testing.T) {
 	//DataOf(1, 2, 3, errors.New("sss")).MustNotError()
-	DataOf(1, 2, 3, nil).MustNotError()
+	DataOf(1, 2, 3, nil).MustNotNil()
 
 }
 
 func TestToData(t *testing.T) {
 	a := "0 */2 * * * *"
-	fmt.Println(DataOf(strings.Split(a, "*")[1]).ToData().String())
-	fmt.Println(ArrayOf(strings.Split(a, "*")).ToData().String())
-	fmt.Println(ArrayOf(strings.Split(a, "*")).ToData().Json())
-	fmt.Println(DataOf(1, 2, 3, "", nil, &a).ToData().Json())
+	fmt.Println(DataOf(strings.Split(a, "*")[1]).ToString())
+	fmt.Println(ArrayOf(strings.Split(a, "*")).ToString())
+	fmt.Println(ArrayOf(strings.Split(a, "*")).ToString())
+	fmt.Println(DataOf(1, 2, 3, "", nil, &a).ToString())
 	DataOf(1, 2, 3, "", nil, &a).P()
 }
 
@@ -178,13 +172,11 @@ func TestExpr(t *testing.T) {
 		fmt.Println(a, b, c, d, e)
 	}).P("test pipe")
 
-	fmt.Println(DataOf(1, 2, 3, 4, nil).FilterExp(`it == nil`).ToData().Json())
-	fmt.Println(DataOf(&t1{A: "1", b: 2}, &t1{A: "1", b: 3}).FilterExp(`it.A == "1"`).ToData().Json())
-	fmt.Println(DataOf(&t1{A: "1", b: 2}, &t1{A: "1", b: 3}).MapExp(`it.A == "1"`).ToData().Json())
+	fmt.Println(DataOf(1, 2, 3, 4, nil).FilterExp(`it == nil`).ToJson())
+	fmt.Println(DataOf(&t1{A: "1", b: 2}, &t1{A: "1", b: 3}).FilterExp(`it.A == "1"`).ToJson())
+	fmt.Println(DataOf(&t1{A: "1", b: 2}, &t1{A: "1", b: 3}).MapExp(`it.A == "1"`).ToJson())
 
-	_a := DataOf(nil, &t1{A: "1", b: 2}, &t1{A: "1", b: 3}).
-		ToData().
-		Interface().([]*t1)
+	_a := DataOf(nil, &t1{A: "1", b: 2}, &t1{A: "1", b: 3}).ToData().([]*t1)
 	fmt.Println(_a)
 	fmt.Println(_a[1].A)
 }
@@ -202,7 +194,7 @@ func (t *M) Name() string {
 func TestSortBy(t *testing.T) {
 	if a, ok := SortBy([]string{"11", "2", "3"}, func(a, b string) bool {
 		return strings.Compare(a, b) > 0
-	}).([]string); ok {
+	}).ToData().([]string); ok {
 		fmt.Println(a)
 	}
 
@@ -213,15 +205,17 @@ func TestSortBy(t *testing.T) {
 			}
 
 			return a.b > b.b
-		}).ToData().Interface())
+		}).ToData())
 
 	fmt.Println(DataOf(1, 11, 2).SortBy(func(a, b int) bool {
 		return a > b
-	}).ToData().Json())
+	}).ToJson())
 
-	fmt.Println(DataOf(1, 11, 2).SortBy(func(a, b int) bool {
+	DataOf(1, 11, 2).SortBy(func(a, b int) bool {
 		return a > b
-	}).ToData().Interface())
+	}).ToData(func(a []int) {
+		fmt.Println(a)
+	})
 }
 
 func TestGroupBy(t *testing.T) {

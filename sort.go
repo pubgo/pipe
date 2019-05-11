@@ -5,7 +5,7 @@ import (
 	"sort"
 )
 
-func SortBy(data interface{}, swap interface{}) interface{} {
+func _SortBy(data interface{}, swap interface{}) interface{} {
 	_AssertFn(swap)
 
 	_d := reflect.ValueOf(data)
@@ -20,7 +20,7 @@ func SortBy(data interface{}, swap interface{}) interface{} {
 	_t := _fn.Type()
 	_ST(_t.NumIn() != 2, "the func input num is more than 2(%d)", _t.NumIn())
 	_ST(_t.Out(0).Kind() != reflect.Bool, "the func output type is not bool(%s)", _t.Out(0).String())
-	_ST(_IfEquals(_d.Index(0).Kind(), _t.In(0).Kind(), _t.In(1).Kind()), "the func output type is not bool(%s)", _t.Out(0).String())
+	_ST(!_IfEquals(_d.Index(0).Kind(), _t.In(0).Kind(), _t.In(1).Kind()), "type error")
 
 	var _ps []reflect.Value
 	for i := 0; i < _d.Len(); i++ {

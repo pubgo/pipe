@@ -8,6 +8,7 @@ import (
 var _AssertFn = assert.AssertFn
 var _FnOf = assert.FnOf
 var _ST = assert.ST
+var _SWrap = assert.SWrap
 var _IsNil = assert.IsNil
 var _IfEquals = assert.IfEquals
 var _If = assert.If

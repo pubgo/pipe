@@ -5,28 +5,17 @@ import (
 	"reflect"
 )
 
-type _data struct {
-	_values []reflect.Value
+func (t *_func) ToRaw() []reflect.Value {
+	return t.params
 }
 
-func (t *_data) String() string {
-	if len(t._values) < 1 || !t._values[0].IsValid() || t._values[0].Kind() != reflect.String {
-		return ""
-	}
-	return t._values[0].String()
+func (t *_func) ToString() string {
+	return t.ToJson()
 }
 
-func (t *_data) Raw() []reflect.Value {
-	return t._values
-}
-
-func (t *_data) Interface() interface{} {
-	if len(t._values) < 1 {
-		return nil
-	}
-
+func (t *_func) ToData(fn ...interface{}) interface{} {
 	var _t reflect.Type
-	for _, _v := range t._values {
+	for _, _v := range t.params {
 		if _v.IsValid() {
 			_t = _v.Type()
 			break
@@ -37,29 +26,31 @@ func (t *_data) Interface() interface{} {
 		return nil
 	}
 
-	for i := 0; i < len(t._values); i++ {
-		if !t._values[i].IsValid() {
-			t._values[i] = reflect.Zero(_t)
+	for i := 0; i < len(t.params); i++ {
+		if !t.params[i].IsValid() {
+			t.params[i] = reflect.Zero(_t)
 		}
 	}
 
-	_rst := reflect.MakeSlice(reflect.SliceOf(_t), 0, len(t._values))
-	_rst = reflect.Append(_rst, t._values...)
+	_rst := reflect.MakeSlice(reflect.SliceOf(_t), 0, len(t.params))
+	_rst = reflect.Append(_rst, t.params...)
+
+	if len(fn) != 0 && !_IsNil(fn[0]) && reflect.TypeOf(fn[0]).Kind() == reflect.Func {
+		reflect.ValueOf(fn[0]).Call([]reflect.Value{_rst})
+		return nil
+	}
+
 	return _rst.Interface()
 }
 
-func (t *_data) Json() string {
+func (t *_func) ToJson() string {
 	var _res []interface{}
-	for _, _p := range t._values {
-		if !_p.IsValid() {
-			_res = append(_res, nil)
-		} else {
-			_res = append(_res, _p.Interface())
-		}
+	for _, _p := range t.params {
+		_res = append(_res, _If(_p.IsValid(), _p.Interface(), nil))
 	}
 
 	dt, err := json.Marshal(_res)
-	_ST(err != nil, "data json error(%s)", err)
+	_SWrap(err, "data json error")
 
 	return string(dt)
 }
