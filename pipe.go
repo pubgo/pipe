@@ -67,9 +67,9 @@ func (t *_func) MapExp(code string) *_func {
 	var vs []reflect.Value
 	for _, p := range t.params {
 		if !p.IsValid() {
-			_ps["it"] = nil
+			_ps["t"] = nil
 		} else {
-			_ps["it"] = p.Interface()
+			_ps["t"] = p.Interface()
 		}
 
 		output, err := _Eval(code, _ps)

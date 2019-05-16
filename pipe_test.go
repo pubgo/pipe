@@ -134,8 +134,7 @@ func TestPipe(t *testing.T) {
 
 func TestError(t *testing.T) {
 	//DataOf(1, 2, 3, errors.New("sss")).MustNotError()
-	DataOf(1, 2, 3, nil).MustNotNil()
-
+	//DataOf(1, 2, 3, nil).MustNotNil()
 }
 
 func TestToData(t *testing.T) {
@@ -143,7 +142,7 @@ func TestToData(t *testing.T) {
 	fmt.Println(DataOf(strings.Split(a, "*")[1]).ToString())
 	fmt.Println(ArrayOf(strings.Split(a, "*")).ToString())
 	fmt.Println(ArrayOf(strings.Split(a, "*")).ToString())
-	fmt.Println(DataOf(1, 2, 3, "", nil, &a).ToString())
+	DataOf(1, 2, 3, "", nil, &a).P()
 	DataOf(1, 2, 3, "", nil, &a).P()
 }
 
@@ -172,9 +171,9 @@ func TestExpr(t *testing.T) {
 		fmt.Println(a, b, c, d, e)
 	}).P("test pipe")
 
-	fmt.Println(DataOf(1, 2, 3, 4, nil).FilterExp(`it == nil`).ToJson())
-	fmt.Println(DataOf(&t1{A: "1", b: 2}, &t1{A: "1", b: 3}).FilterExp(`it.A == "1"`).ToJson())
-	fmt.Println(DataOf(&t1{A: "1", b: 2}, &t1{A: "1", b: 3}).MapExp(`it.A == "1"`).ToJson())
+	fmt.Println(DataOf(1, 2, 3, 4, nil).FilterExp(`t != nil`).ToJson())
+	fmt.Println(DataOf(&t1{A: "1", b: 2}, &t1{A: "1", b: 3}).FilterExp(`t.A == "1"`).ToJson())
+	fmt.Println(DataOf(&t1{A: "1", b: 2}, &t1{A: "1", b: 3}).MapExp(`t.A == "1"`).ToJson())
 
 	_a := DataOf(nil, &t1{A: "1", b: 2}, &t1{A: "1", b: 3}).ToData().([]*t1)
 	fmt.Println(_a)
