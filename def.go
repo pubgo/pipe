@@ -18,7 +18,7 @@ type IPipe interface {
 
 	FilterNil() *_func
 	FilterExp(filter string) *_func
-	Filter(fn func(v interface{}) bool) *_func
+	Filter(fn interface{}) *_func
 
 	MustNotNil()
 }

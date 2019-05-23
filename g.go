@@ -10,7 +10,6 @@ var _FnOf = assert.FnOf
 var _ST = assert.T
 var _SWrap = assert.ErrWrap
 var _IsNil = assert.IsNil
-var _IfEquals = assert.IfEquals
 var _If = assert.If
 var _IsPtr = assert.IsPtr
 

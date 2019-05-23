@@ -42,26 +42,12 @@ func (t *_func) ToData(fn ...interface{}) interface{} {
 
 	return _rst.Interface()
 }
-func IsNil(p interface{}) (b bool) {
-	defer func() {
-		if err := recover(); err != nil {
-			b = false
-		}
-	}()
-
-	if !reflect.ValueOf(p).IsValid() {
-		return true
-	}
-
-	return reflect.ValueOf(p).IsNil()
-}
 
 func (t *_func) ToJson() string {
 	var _res []interface{}
 	for _, _p := range t.params {
-		_res = append(_res, _If(IsNil(_p),"", _FnOf(_p.Interface)))
+		_res = append(_res, _If(_IsNil(_p), "", _FnOf(_p.Interface)))
 	}
-
 
 	dt, err := json.Marshal(_res)
 	_SWrap(err, "data json error")

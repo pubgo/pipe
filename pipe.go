@@ -5,8 +5,9 @@ import (
 	"reflect"
 )
 
+var _ IPipe = (*_func)(nil)
+
 type _func struct {
-	IPipe
 	params []reflect.Value
 }
 
